@@ -13,7 +13,7 @@ export const Route = createFileRoute("/")({
       { title: "30 Dias Caminhando — Perca gordura sem academia" },
       { name: "description", content: "Guia prático para queimar gordura caminhando 30 minutos por dia. Sem academia, sem dieta maluca. Comece hoje por R$16,90." },
       { property: "og:title", content: "30 Dias Caminhando — Perca gordura sem academia" },
-      { property: "og:description", content: "Guia prático para queimar gordura caminhando 30 minutos por dia. Sem academia, sem dieta maluca." },
+      { property: "og:description", content: "Guia prático para queimar gordura caminhando 30 minutos por dia. Sem academia, sem dieta maluca. Comece hoje por R$16,90." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
     ],

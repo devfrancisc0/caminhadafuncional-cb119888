@@ -77,14 +77,18 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { title: "Lovable App" },
-      { name: "description", content: "Lovable Generated Project" },
+      { title: "30 Dias Caminhando — Perca gordura sem academia" },
+      { name: "description", content: "Guia prático para queimar gordura caminhando 30 minutos por dia. Sem academia, sem dieta maluca. Comece hoje por R$16,90." },
       { name: "author", content: "Lovable" },
-      { property: "og:title", content: "Lovable App" },
-      { property: "og:description", content: "Lovable Generated Project" },
+      { property: "og:title", content: "30 Dias Caminhando — Perca gordura sem academia" },
+      { property: "og:description", content: "Guia prático para queimar gordura caminhando 30 minutos por dia. Sem academia, sem dieta maluca. Comece hoje por R$16,90." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
       { name: "twitter:site", content: "@Lovable" },
+      { name: "twitter:title", content: "30 Dias Caminhando — Perca gordura sem academia" },
+      { name: "twitter:description", content: "Guia prático para queimar gordura caminhando 30 minutos por dia. Sem academia, sem dieta maluca. Comece hoje por R$16,90." },
+      { property: "og:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/d8ab01e2-4db7-4f6f-b00e-cf1d014dfd11/id-preview-5e9fbcf1--4b9ee396-8137-4009-95cd-8714fcbd8dae.lovable.app-1784671607977.png" },
+      { name: "twitter:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/d8ab01e2-4db7-4f6f-b00e-cf1d014dfd11/id-preview-5e9fbcf1--4b9ee396-8137-4009-95cd-8714fcbd8dae.lovable.app-1784671607977.png" },
     ],
     links: [
       {
