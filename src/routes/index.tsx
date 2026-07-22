@@ -285,7 +285,6 @@ function SalesPage() {
                   "🎁 Bônus: Receitas Detox Fit",
                   "🎁 Bônus: Playlist Motivacional",
                   "🎁 Bônus: Checklist Anti-Compulsão",
-                  "Suporte prioritário via WhatsApp",
                 ].map((t, i) => (
                   <li key={i} className="flex items-start gap-2 text-sm">
                     <Check className="mt-0.5 h-4 w-4 shrink-0 text-primary" strokeWidth={3} /> <span className="font-medium">{t}</span>
