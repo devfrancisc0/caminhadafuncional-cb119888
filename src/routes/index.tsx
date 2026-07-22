@@ -296,7 +296,12 @@ function SalesPage() {
                   </li>
                 ))}
               </ul>
-              <a href="#" className="btn-cta btn-cta-hover mt-8 w-full">
+              <a
+                href="https://pay.kiwify.com.br/AcxCHV4"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="btn-cta btn-cta-hover mt-8 w-full"
+              >
                 QUERO O PREMIUM →
               </a>
               <p className="mt-3 flex items-center justify-center gap-1.5 text-xs text-muted-foreground">
