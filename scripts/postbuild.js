@@ -60,4 +60,16 @@ if (existsSync(clientDir)) {
   rmSync(clientDir, { recursive: true, force: true });
 }
 
+// Remove server artifacts and Nitro metadata — not needed for static hosting.
+const serverDir = join(distDir, "server");
+if (existsSync(serverDir)) {
+  rmSync(serverDir, { recursive: true, force: true });
+}
+for (const file of ["nitro.json", "package.json", "package-lock.json"]) {
+  const filePath = join(distDir, file);
+  if (existsSync(filePath)) {
+    rmSync(filePath, { force: true });
+  }
+}
+
 console.log("[postbuild] dist/ ready for static hosting");
