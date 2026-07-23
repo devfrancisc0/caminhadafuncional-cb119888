@@ -33,9 +33,22 @@ function staticPrerenderServerShim() {
               `  waitUntil: () => {},\n` +
               `  passThroughOnException: () => {},\n` +
               `};\n` +
+              `function toMutableRequest(req) {\n` +
+              `  const headers = Object.fromEntries(req.headers.entries());\n` +
+              `  const mutable = new Request(req.url, {\n` +
+              `    method: req.method,\n` +
+              `    headers,\n` +
+              `    body: req.body,\n` +
+              `  });\n` +
+              `  return mutable;\n` +
+              `}\n` +
               `export default {\n` +
               `  fetch(request) {\n` +
-              `    return cloudflareHandler.fetch(request, mockEnv, mockContext);\n` +
+              `    return cloudflareHandler.fetch(\n` +
+              `      toMutableRequest(request),\n` +
+              `      mockEnv,\n` +
+              `      mockContext,\n` +
+              `    );\n` +
               `  },\n` +
               `};\n`,
           );
