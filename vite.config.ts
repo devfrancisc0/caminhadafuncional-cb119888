@@ -16,10 +16,7 @@ import { join } from "node:path";
  * static hosting (dist/index.html + dist/assets + dist/favicon.ico).
  */
 function staticPrerenderServerShim() {
-  const cwd = process.cwd();
-  const distDir = join(cwd, "dist");
-  const clientDir = join(distDir, "client");
-  const serverDir = join(distDir, "server");
+  const serverDir = join(process.cwd(), "dist", "server");
 
   return {
     name: "static-prerender-server-shim",
