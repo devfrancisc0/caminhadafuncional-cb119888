@@ -27,7 +27,17 @@ function staticPrerenderServerShim() {
         if (existsSync(indexPath) && !existsSync(shimPath)) {
           writeFileSync(
             shimPath,
-            `export { default } from "./index.mjs";\nexport * from "./index.mjs";\n`,
+            `import cloudflareHandler from "./index.mjs";\n` +
+              `const mockEnv = {};\n` +
+              `const mockContext = {\n` +
+              `  waitUntil: () => {},\n` +
+              `  passThroughOnException: () => {},\n` +
+              `};\n` +
+              `export default {\n` +
+              `  fetch(request) {\n` +
+              `    return cloudflareHandler.fetch(request, mockEnv, mockContext);\n` +
+              `  },\n` +
+              `};\n`,
           );
         }
       },
