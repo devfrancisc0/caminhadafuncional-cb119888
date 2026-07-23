@@ -72,11 +72,13 @@ function staticPrerenderServerShim() {
     buildEnd: {
       order: "post",
       handler() {
+        console.log("[static-shim] buildEnd running");
         // Restructure dist/ for static hosting once prerender is done.
         if (
           existsSync(clientDir) &&
           existsSync(join(clientDir, "index.html"))
         ) {
+          console.log("[static-shim] restructuring dist/ for static hosting");
           // Move assets to dist/assets
           const assetsDir = join(clientDir, "assets");
           const distAssetsDir = join(distDir, "assets");
@@ -106,6 +108,9 @@ function staticPrerenderServerShim() {
           if (existsSync(clientDir)) {
             rmSync(clientDir, { recursive: true, force: true });
           }
+          console.log("[static-shim] dist/ restructured");
+        } else {
+          console.log("[static-shim] client/index.html not found, skipping");
         }
       },
     },
