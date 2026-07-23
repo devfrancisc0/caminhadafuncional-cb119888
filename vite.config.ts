@@ -5,11 +5,77 @@
 //     React/TanStack dedupe, error logger plugins, and sandbox detection (port/host/strictPort).
 // You can pass additional config via defineConfig({ vite: { ... }, etc... }) if needed.
 import { defineConfig } from "@lovable.dev/vite-tanstack-config";
+import { existsSync, writeFileSync } from "node:fs";
+import { join } from "node:path";
+
+/**
+ * Workaround: TanStack Start's prerender preview server looks for
+ * dist/server/server.js, but Nitro outputs dist/server/index.mjs.
+ * This plugin creates a server.js shim after the Nitro build so
+ * prerender can load the server entry, then restructures dist/ for
+ * static hosting (dist/index.html + dist/assets + dist/favicon.ico).
+ */
+function staticPrerenderServerShim() {
+  const serverDir = join(process.cwd(), "dist", "server");
+
+  return {
+    name: "static-prerender-server-shim",
+    apply: "build",
+    closeBundle: {
+      order: "post",
+      handler() {
+        // Create a server.js shim so the prerender preview server can
+        // load the Cloudflare worker entry in Node.js.
+        const indexPath = join(serverDir, "index.mjs");
+        const shimPath = join(serverDir, "server.js");
+        if (existsSync(indexPath) && !existsSync(shimPath)) {
+          writeFileSync(
+            shimPath,
+            `import cloudflareHandler from "./index.mjs";\n` +
+              `const mockEnv = {};\n` +
+              `const mockContext = {\n` +
+              `  waitUntil: () => {},\n` +
+              `  passThroughOnException: () => {},\n` +
+              `};\n` +
+              `function toMutableRequest(req) {\n` +
+              `  const headers = Object.fromEntries(req.headers.entries());\n` +
+              `  const mutable = new Request(req.url, {\n` +
+              `    method: req.method,\n` +
+              `    headers,\n` +
+              `    body: req.body,\n` +
+              `  });\n` +
+              `  return mutable;\n` +
+              `}\n` +
+              `export default {\n` +
+              `  fetch(request) {\n` +
+              `    return cloudflareHandler.fetch(\n` +
+              `      toMutableRequest(request),\n` +
+              `      mockEnv,\n` +
+              `      mockContext,\n` +
+              `    );\n` +
+              `  },\n` +
+              `};\n`,
+          );
+        }
+      },
+    },
+    // Note: dist/ restructuring happens in the postbuild script because
+    // prerender writes dist/client/index.html after all Vite hooks finish.
+  };
+}
 
 export default defineConfig({
+  vite: {
+    plugins: [staticPrerenderServerShim()],
+  },
   tanstackStart: {
-    // Redirect TanStack Start's bundled server entry to src/server.ts (our SSR error wrapper).
-    // nitro/vite builds from this
-    server: { entry: "server" },
+    // Generate static HTML files for static hosting (dist/index.html + assets).
+    prerender: {
+      enabled: true,
+      autoSubfolderIndex: true,
+      autoStaticPathsDiscovery: true,
+      crawlLinks: true,
+      failOnError: true,
+    },
   },
 });
