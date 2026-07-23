@@ -69,51 +69,8 @@ function staticPrerenderServerShim() {
         }
       },
     },
-    buildEnd: {
-      order: "post",
-      handler() {
-        console.log("[static-shim] buildEnd running");
-        // Restructure dist/ for static hosting once prerender is done.
-        if (
-          existsSync(clientDir) &&
-          existsSync(join(clientDir, "index.html"))
-        ) {
-          console.log("[static-shim] restructuring dist/ for static hosting");
-          // Move assets to dist/assets
-          const assetsDir = join(clientDir, "assets");
-          const distAssetsDir = join(distDir, "assets");
-          if (existsSync(assetsDir) && !existsSync(distAssetsDir)) {
-            mkdirSync(distAssetsDir, { recursive: true });
-            for (const entry of readdirSync(assetsDir)) {
-              renameSync(join(assetsDir, entry), join(distAssetsDir, entry));
-            }
-            rmSync(assetsDir, { recursive: true, force: true });
-          }
-
-          // Move favicon
-          const faviconSrc = join(clientDir, "favicon.ico");
-          const faviconDst = join(distDir, "favicon.ico");
-          if (existsSync(faviconSrc) && !existsSync(faviconDst)) {
-            renameSync(faviconSrc, faviconDst);
-          }
-
-          // Move index.html to dist root
-          const indexSrc = join(clientDir, "index.html");
-          const indexDst = join(distDir, "index.html");
-          if (existsSync(indexSrc) && !existsSync(indexDst)) {
-            renameSync(indexSrc, indexDst);
-          }
-
-          // Remove now-empty client directory
-          if (existsSync(clientDir)) {
-            rmSync(clientDir, { recursive: true, force: true });
-          }
-          console.log("[static-shim] dist/ restructured");
-        } else {
-          console.log("[static-shim] client/index.html not found, skipping");
-        }
-      },
-    },
+    // Note: dist/ restructuring happens in the postbuild script because
+    // prerender writes dist/client/index.html after all Vite hooks finish.
   };
 }
 
