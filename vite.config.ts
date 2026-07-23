@@ -23,19 +23,19 @@ import { join } from "node:path";
  * static hosting (dist/index.html + dist/assets + dist/favicon.ico).
  */
 function staticPrerenderServerShim() {
+  const cwd = process.cwd();
+  const distDir = join(cwd, "dist");
+  const clientDir = join(distDir, "client");
+  const serverDir = join(distDir, "server");
+
   return {
     name: "static-prerender-server-shim",
     apply: "build",
     closeBundle: {
       order: "post",
       handler() {
-        const cwd = process.cwd();
-        const distDir = join(cwd, "dist");
-        const clientDir = join(distDir, "client");
-        const serverDir = join(distDir, "server");
-
-        // 1. Create a server.js shim so the prerender preview server can
-        //    load the Cloudflare worker entry in Node.js.
+        // Create a server.js shim so the prerender preview server can
+        // load the Cloudflare worker entry in Node.js.
         const indexPath = join(serverDir, "index.mjs");
         const shimPath = join(serverDir, "server.js");
         if (existsSync(indexPath) && !existsSync(shimPath)) {
@@ -67,56 +67,46 @@ function staticPrerenderServerShim() {
               `};\n`,
           );
         }
-
-        // 2. Restructure dist/ for static hosting once prerender is done.
-        //    Use buildEnd so it runs after the TanStack Start prerender writes
-        //    dist/client/index.html.
-        this.environment.buildEnd = {
-          order: "post",
-          handler() {
-            console.log("[static-shim] buildEnd — restructuring dist/");
-            if (
-              existsSync(clientDir) &&
-              existsSync(join(clientDir, "index.html"))
-            ) {
-              // Move assets to dist/assets
-              const assetsDir = join(clientDir, "assets");
-              const distAssetsDir = join(distDir, "assets");
-              if (existsSync(assetsDir) && !existsSync(distAssetsDir)) {
-                mkdirSync(distAssetsDir, { recursive: true });
-                for (const entry of readdirSync(assetsDir)) {
-                  renameSync(
-                    join(assetsDir, entry),
-                    join(distAssetsDir, entry),
-                  );
-                }
-                rmSync(assetsDir, { recursive: true, force: true });
-              }
-
-              // Move favicon
-              const faviconSrc = join(clientDir, "favicon.ico");
-              const faviconDst = join(distDir, "favicon.ico");
-              if (existsSync(faviconSrc) && !existsSync(faviconDst)) {
-                renameSync(faviconSrc, faviconDst);
-              }
-
-              // Move index.html to dist root
-              const indexSrc = join(clientDir, "index.html");
-              const indexDst = join(distDir, "index.html");
-              if (existsSync(indexSrc) && !existsSync(indexDst)) {
-                renameSync(indexSrc, indexDst);
-              }
-
-              // Remove now-empty client directory
-              if (existsSync(clientDir)) {
-                rmSync(clientDir, { recursive: true, force: true });
-              }
-              console.log("[static-shim] dist/ restructured for static hosting");
-            } else {
-              console.log("[static-shim] dist/client/index.html not found, skipping restructure");
+      },
+    },
+    buildEnd: {
+      order: "post",
+      handler() {
+        // Restructure dist/ for static hosting once prerender is done.
+        if (
+          existsSync(clientDir) &&
+          existsSync(join(clientDir, "index.html"))
+        ) {
+          // Move assets to dist/assets
+          const assetsDir = join(clientDir, "assets");
+          const distAssetsDir = join(distDir, "assets");
+          if (existsSync(assetsDir) && !existsSync(distAssetsDir)) {
+            mkdirSync(distAssetsDir, { recursive: true });
+            for (const entry of readdirSync(assetsDir)) {
+              renameSync(join(assetsDir, entry), join(distAssetsDir, entry));
             }
-          },
-        };
+            rmSync(assetsDir, { recursive: true, force: true });
+          }
+
+          // Move favicon
+          const faviconSrc = join(clientDir, "favicon.ico");
+          const faviconDst = join(distDir, "favicon.ico");
+          if (existsSync(faviconSrc) && !existsSync(faviconDst)) {
+            renameSync(faviconSrc, faviconDst);
+          }
+
+          // Move index.html to dist root
+          const indexSrc = join(clientDir, "index.html");
+          const indexDst = join(distDir, "index.html");
+          if (existsSync(indexSrc) && !existsSync(indexDst)) {
+            renameSync(indexSrc, indexDst);
+          }
+
+          // Remove now-empty client directory
+          if (existsSync(clientDir)) {
+            rmSync(clientDir, { recursive: true, force: true });
+          }
+        }
       },
     },
   };
