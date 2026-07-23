@@ -5,14 +5,22 @@
 //     React/TanStack dedupe, error logger plugins, and sandbox detection (port/host/strictPort).
 // You can pass additional config via defineConfig({ vite: { ... }, etc... }) if needed.
 import { defineConfig } from "@lovable.dev/vite-tanstack-config";
-import { existsSync, writeFileSync } from "node:fs";
+import {
+  existsSync,
+  mkdirSync,
+  readdirSync,
+  renameSync,
+  rmSync,
+  writeFileSync,
+} from "node:fs";
 import { join } from "node:path";
 
 /**
  * Workaround: TanStack Start's prerender preview server looks for
  * dist/server/server.js, but Nitro outputs dist/server/index.mjs.
  * This plugin creates a server.js shim after the Nitro build so
- * prerender can load the server entry.
+ * prerender can load the server entry, then restructures dist/ for
+ * static hosting (dist/index.html + dist/assets + dist/favicon.ico).
  */
 function staticPrerenderServerShim() {
   return {
@@ -21,7 +29,13 @@ function staticPrerenderServerShim() {
     closeBundle: {
       order: "post",
       handler() {
-        const serverDir = join(process.cwd(), "dist", "server");
+        const cwd = process.cwd();
+        const distDir = join(cwd, "dist");
+        const clientDir = join(distDir, "client");
+        const serverDir = join(distDir, "server");
+
+        // 1. Create a server.js shim so the prerender preview server can
+        //    load the Cloudflare worker entry in Node.js.
         const indexPath = join(serverDir, "index.mjs");
         const shimPath = join(serverDir, "server.js");
         if (existsSync(indexPath) && !existsSync(shimPath)) {
@@ -52,6 +66,42 @@ function staticPrerenderServerShim() {
               `  },\n` +
               `};\n`,
           );
+        }
+
+        // 2. Restructure dist/ for static hosting once prerender is done.
+        if (
+          existsSync(clientDir) &&
+          existsSync(join(clientDir, "index.html"))
+        ) {
+          // Move assets to dist/assets
+          const assetsDir = join(clientDir, "assets");
+          const distAssetsDir = join(distDir, "assets");
+          if (existsSync(assetsDir) && !existsSync(distAssetsDir)) {
+            mkdirSync(distAssetsDir, { recursive: true });
+            for (const entry of readdirSync(assetsDir)) {
+              renameSync(join(assetsDir, entry), join(distAssetsDir, entry));
+            }
+            rmSync(assetsDir, { recursive: true, force: true });
+          }
+
+          // Move favicon
+          const faviconSrc = join(clientDir, "favicon.ico");
+          const faviconDst = join(distDir, "favicon.ico");
+          if (existsSync(faviconSrc) && !existsSync(faviconDst)) {
+            renameSync(faviconSrc, faviconDst);
+          }
+
+          // Move index.html to dist root
+          const indexSrc = join(clientDir, "index.html");
+          const indexDst = join(distDir, "index.html");
+          if (existsSync(indexSrc) && !existsSync(indexDst)) {
+            renameSync(indexSrc, indexDst);
+          }
+
+          // Remove now-empty client directory
+          if (existsSync(clientDir)) {
+            rmSync(clientDir, { recursive: true, force: true });
+          }
         }
       },
     },
