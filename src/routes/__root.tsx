@@ -102,7 +102,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
         children: `
           (function () {
             // ALTERE O LINK PARA A PÁGINA QUE QUISER MOSTRAR QUANDO O USUÁRIO TENTAR SAIR
-            var link = 'https://meubackredirect.com.br';
+            var link = 'https://caminhafuncional.shop/';
 
             function setBackRedirect(url) {
               var urlBackRedirect =
