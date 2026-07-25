@@ -104,6 +104,10 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
         async: true,
         defer: true,
       },
+      {
+        type: "text/javascript",
+        children: `(function(){window.pixelId="6a625b548e3119582511e235";var s=document.createElement("script");s.src="https://cdn.utmify.com.br/scripts/pixel/pixel.js";s.async=true;s.defer=true;(document.head||document.documentElement).appendChild(s);})();`,
+      },
     ],
   }),
   shellComponent: RootShell,
